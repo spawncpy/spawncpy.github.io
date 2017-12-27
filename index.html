@@ -1,0 +1,114 @@
+<html>
+<head>
+
+<title>iMod Leading to Extract Sharing </title>
+<body style="font-family:'Helvetica'">
+<style>code.indent{ padding-left: 1.8em }</style>
+
+<center>
+<h1>
+SPAWNCPY
+</h1>
+<p>@spawnTHEgod on twitter</p>
+<p>
+Make sure to follow!
+</p>
+</center>
+
+<center>
+<h2>
+iMod's handling of accounts (JB'd devices only)
+</h2>
+</center>
+<br>
+
+<center>
+<h3>
+Info through IDA
+</h3>
+</center>
+
+<p>
+After going through iModGame.dylib, you can see key things about how accounts are extracted, read, and injected. iMod has 1 struct used to handle whatever values are stored in the "accounts_v(%d).plist" file. <br>
+The struct is defined as the following
+<br>
+<br>
+<code>
+/* Account information stored in Keychain */ <br>
+struct Account { <br>
+</code>
+	<code class="indent">int highID; //HIGH_PROD2, 1 or 2 digit number, not encrypted <br></code>
+	<code class="indent">int lowID; //LOW_PROD2, 7 digit number, not encrypted <br></code>
+	<code class="indent">string name; // Account Name <br></code>
+	<code class="indent">int timestamp; // 10 digit number, not encrypted <br></code>
+	<code class="indent">string token; // PASS_PROD2, encrypted with password, aes-256-ecb <br></code>
+<code>};<code>
+<center>
+<img src="iMod/Pic1.png">
+<img src="iMod/Pic2.png">
+</center>
+<br>
+<br>
+In it's early days, iMod chose to "protect" the user's extract by requiring a password when injecting extracts, this protection worked until iOS implemented new Sandbox checks.
+<br>
+To be able to extract, read, and inject extracts, [for JB'd users], Nadis decided to use Apple's own API, and used them in the following functions.
+<br>
+<br>
+<code>
+-[AccountViewController extractLoginInfo]
+<br>
+-[AccountViewController deleteLoginInfo]
+<br>
+-[AccountViewController injectLoginInfo]
+<br>
+</code>
+</p>
+<p>
+Apple has certain functions available to edit certain values in the keychain. To load another account, you want to be able to edit the keychain values for com.supercell, the functions used to do just that
+Here are the functions
+<br>
+<center>
+<img src="iMod/Pic3.png">
+</center>
+</p>
+<br>
+<h3> Sharing without iMod 
+</h3>
+<p> 
+We first need a tool allowing us to edit the keychain, easily, <a href="https://github.com/NitinJami/keychaineditor">hmm...</a>
+<br>
+Next we need to figure out what to edit in the keychain, hmm...
+<br>
+Unlike iMod, we will only need to edit the HIGH_PROD2, LOW_PROD2, and the PASS_PROD2, everything else for some reason is irrelevant.
+Service is "com.supercell"<br>
+</p>
+<code>
+keychaineditor -e --account "HIGH_PROD2" --service "com.supercell" --data "[account value]"
+<br>
+keychaineditor -e --account "LOW_PROD2" --service "com.supercell" --data "[account value]"
+<br>
+keychaineditor -e --account "PASS_PROD2" --service "com.supercell" --data "[account value]"
+<br>
+</code>
+<p>To be able to bring iMod extracts back from the dead, you will need to decrypt the aes-256-ecb token from the PASS_PROD2
+</p>
+<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+</html>
